@@ -13,11 +13,10 @@
 </form>
 
 <%-- ============================================================
-     DÉCLARATIONS DES CLASSES (bloc <%! %> = niveau classe)
+     DÉCLARATIONS DES CLASSES
      ============================================================ --%>
 <%!
     // ----- Exercice 5 : Personne avec encapsulation -----
-    // Les attributs sont privés, on accède via getters/setters
     class Personne {
         private String nom;
         private int age;
@@ -53,9 +52,11 @@
         }
     }
 
-    // ----- Exercice 4 : Classe CompteBancaire -----
+    // ----- Exercice 4 : Classe CompteBancaire (solde encapsulé) -----
     class CompteBancaire {
-        double solde;
+        private double solde;
+
+        public double getSolde() { return solde; }
 
         public void deposer(double montant) {
             solde += montant;
@@ -68,61 +69,78 @@
 %>
 
 <%-- ============================================================
-     CODE SCRIPTLET : récupération du formulaire + affichage
+     RÉCUPÉRATION DU FORMULAIRE ET AFFICHAGE
      ============================================================ --%>
 <%
     String nom = request.getParameter("nom");
     String age = request.getParameter("age");
 
     if (nom != null && age != null && !nom.isEmpty() && !age.isEmpty()) {
+        try {
 %>
+            <%-- Création de l'objet Personne via setters (Exercice 5) --%>
+            <%
+                Personne p = new Personne();
+                p.setNom(nom);
+                p.setAge(Integer.parseInt(age));
+            %>
+            <p>Objet Personne créé !</p>
+            <p>Nom : <%= p.getNom() %></p>
+            <p>Age : <%= p.getAge() %> ans</p>
 
-    <%-- ----- Objet Personne (Exercice 5 : via setters) ----- --%>
-    <%
-        Personne p = new Personne();
-        p.setNom(nom);                        // setter au lieu de p.nom = nom
-        p.setAge(Integer.parseInt(age));       // setter au lieu de p.age = age
-    %>
-    <p>Objet Personne créé !</p>
-    <p>Nom : <%= p.getNom() %></p>            <%-- getter --%>
-    <p>Age : <%= p.getAge() %> ans</p>        <%-- getter --%>
+            <%-- Exercice 1 : La classe Voiture --%>
+            <h2>Exercice 1 : La classe Voiture</h2>
+            <%
+                Voiture v = new Voiture();
+                v.marque = "Renault";
+                v.modele = "Clio";
+                v.annee  = 2020;
+            %>
+            <p>Marque : <%= v.marque %></p>
+            <p>Modèle : <%= v.modele %></p>
+            <p>Année  : <%= v.annee %></p>
 
-    <%-- ----- Exercice 2 : méthode seDecrire() ----- --%>
-    <h2>Exercice 2 : Description de la personne</h2>
-    <p><%= p.seDecrire() %></p>
+            <%-- Exercice 2 : Ajouter une méthode à la classe Personne --%>
+            <h2>Exercice 2 : Ajouter une méthode à la classe Personne</h2>
+            <p><%= p.seDecrire() %></p>
 
-    <%-- ----- Exercice 1 : Classe Voiture ----- --%>
-    <h2>Exercice 1 : La classe Voiture</h2>
-    <%
-        Voiture v = new Voiture();
-        v.marque = "Renault";
-        v.modele = "Clio";
-        v.annee  = 2020;
-    %>
-    <p>Marque : <%= v.marque %></p>
-    <p>Modèle : <%= v.modele %></p>
-    <p>Année  : <%= v.annee %></p>
+            <%-- Exercice 3 : La classe Rectangle --%>
+            <h2>Exercice 3 : La classe Rectangle</h2>
+            <%
+                Rectangle r = new Rectangle();
+                r.longueur = 5;
+                r.largeur  = 3;
+            %>
+            <p>Longueur : <%= r.longueur %>, Largeur : <%= r.largeur %></p>
+            <p>Surface : <%= r.calculerSurface() %></p>
 
-    <%-- ----- Exercice 3 : Classe Rectangle ----- --%>
-    <h2>Exercice 3 : La classe Rectangle</h2>
-    <%
-        Rectangle r = new Rectangle();
-        r.longueur = 5;
-        r.largeur  = 3;
-    %>
-    <p>Longueur : <%= r.longueur %>, Largeur : <%= r.largeur %></p>
-    <p>Surface  : <%= r.calculerSurface() %></p>
+            <%-- Exercice 4 : Le compte bancaire --%>
+            <h2>Exercice 4 : Le compte bancaire</h2>
+            <%
+                CompteBancaire compte = new CompteBancaire();
+                compte.deposer(100);
+                compte.retirer(30);
+            %>
+            <p>Solde après dépôt de 100€ et retrait de 30€ : <%= compte.getSolde() %> €</p>
 
-    <%-- ----- Exercice 4 : Compte bancaire ----- --%>
-    <h2>Exercice 4 : Le compte bancaire</h2>
-    <%
-        CompteBancaire compte = new CompteBancaire();
-        compte.deposer(100);   // solde = 100
-        compte.retirer(30);    // solde = 70
-    %>
-    <p>Solde après dépôt de 100€ et retrait de 30€ : <%= compte.solde %> €</p>
+            <%-- Exercice 5 : L'encapsulation --%>
+            <h2>Exercice 5 : L'encapsulation</h2>
+            <p>Les attributs <code>nom</code> et <code>age</code> de la classe
+            <code>Personne</code> sont <strong>privés</strong>.<br>
+            On y accède uniquement via les getters et setters :<br>
+            <code>getNom()</code>, <code>setNom(...)</code>,
+            <code>getAge()</code>, <code>setAge(...)</code>.<br>
+            Le <code>solde</code> de <code>CompteBancaire</code> est également
+            privé, accessible via <code>getSolde()</code>.</p>
 
-<% } %>
+<%
+        } catch (NumberFormatException e) {
+%>
+            <p style="color:red;">Erreur : l'âge doit être un nombre entier valide.</p>
+<%
+        }
+    }
+%>
 
 <p><a href="index.html">Retour au sommaire</a></p>
 </body>

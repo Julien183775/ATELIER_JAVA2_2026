@@ -1,27 +1,17 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<html>
-<head>
-    <title>Le polymorphisme</title>
-</head>
-<body bgcolor=white>
-<h1>Exercices sur le polymorphisme</h1>
+<%@page import="java.util.Locale"%>
 
-<form action="#" method="post">
-    <p>Saisir le nom d'un chien : <input type="text" name="nomChien"></p>
-    <p>Saisir le nom d'un chat : <input type="text" name="nomChat"></p>
-    <p><input type="submit" value="Faire crier les animaux"></p>
-</form>
-
-<%-- ============================================================
-     DÉCLARATIONS DES CLASSES ET INTERFACES
-     ============================================================ --%>
 <%!
-    // ----- Interface Affichable (Exercice 3) -----
+    // ============================================================
+    // INTERFACE AFFICHABLE - EXERCICE 3
+    // ============================================================
     interface Affichable {
-        void afficher();
+        String afficher();
     }
 
-    // ----- Classe abstraite Animal (base + Exercice 1 : toString) -----
+    // ============================================================
+    // CLASSE ABSTRAITE ANIMAL
+    // ============================================================
     abstract class Animal {
         protected String nom;
 
@@ -29,16 +19,17 @@
             this.nom = nom;
         }
 
-        // Méthode abstraite : chaque sous-classe DOIT l'implémenter
         public abstract String crier();
 
-        // Exercice 1 : toString() dans la classe mère (version générique)
+        @Override
         public String toString() {
             return "Animal nommé " + nom;
         }
     }
 
-    // ----- Classe Chien (Exercices 1, 2, 3) -----
+    // ============================================================
+    // CLASSE CHIEN - EXERCICES 1 ET 3
+    // ============================================================
     class Chien extends Animal implements Affichable {
 
         public Chien(String nom) {
@@ -50,24 +41,20 @@
             return nom + " dit : Wouf wouf !";
         }
 
-        // Exercice 1 : toString() redéfini dans Chien
         @Override
         public String toString() {
             return "Chien nommé " + nom;
         }
 
-        // Exercice 3 : méthode de l'interface Affichable
         @Override
-        public void afficher() {
-            // stocke le résultat dans un champ pour pouvoir l'afficher en JSP
-        }
-
-        public String getAffichage() {
+        public String afficher() {
             return "Affichage Chien → " + toString();
         }
     }
 
-    // ----- Classe Chat (Exercices 1, 2, 3) -----
+    // ============================================================
+    // CLASSE CHAT - EXERCICES 1 ET 3
+    // ============================================================
     class Chat extends Animal implements Affichable {
 
         public Chat(String nom) {
@@ -79,24 +66,20 @@
             return nom + " dit : Miaou !";
         }
 
-        // Exercice 1 : toString() redéfini dans Chat
         @Override
         public String toString() {
             return "Chat nommé " + nom;
         }
 
-        // Exercice 3 : méthode de l'interface Affichable
         @Override
-        public void afficher() {
-            // idem
-        }
-
-        public String getAffichage() {
+        public String afficher() {
             return "Affichage Chat → " + toString();
         }
     }
 
-    // ----- Exercice 4 : Classe Oiseau -----
+    // ============================================================
+    // CLASSE OISEAU - EXERCICE 4
+    // ============================================================
     class Oiseau extends Animal {
 
         public Oiseau(String nom) {
@@ -114,7 +97,9 @@
         }
     }
 
-    // ----- Exercice 2 : Classe abstraite Forme -----
+    // ============================================================
+    // CLASSE ABSTRAITE FORME - EXERCICE 2
+    // ============================================================
     abstract class Forme {
         public abstract double aire();
     }
@@ -131,6 +116,7 @@
             return Math.PI * rayon * rayon;
         }
 
+        @Override
         public String toString() {
             return "Cercle (rayon=" + rayon + ")";
         }
@@ -148,107 +134,178 @@
             return cote * cote;
         }
 
+        @Override
         public String toString() {
             return "Carré (côté=" + cote + ")";
         }
     }
 %>
 
-<%-- ============================================================
-     RÉCUPÉRATION DU FORMULAIRE ET AFFICHAGE
-     ============================================================ --%>
+<html>
+<head>
+    <title>Le polymorphisme</title>
+</head>
+
+<body bgcolor="white">
+
+<h1>Exercices sur le polymorphisme</h1>
+
+<form action="#" method="post">
+    <p>
+        <label for="nomChien">Saisir le nom d'un chien : </label>
+        <input type="text" id="nomChien" name="nomChien" required>
+    </p>
+
+    <p>
+        <label for="nomChat">Saisir le nom d'un chat : </label>
+        <input type="text" id="nomChat" name="nomChat" required>
+    </p>
+
+    <p>
+        <input type="submit" value="Faire crier les animaux">
+    </p>
+</form>
+
 <%
     String nomChien = request.getParameter("nomChien");
-    String nomChat  = request.getParameter("nomChat");
+    String nomChat = request.getParameter("nomChat");
 
-    if (nomChien != null && nomChat != null && !nomChien.isEmpty() && !nomChat.isEmpty()) {
+    if (nomChien != null && nomChat != null
+            && !nomChien.trim().isEmpty()
+            && !nomChat.trim().isEmpty()) {
 
-        Chien  chien  = new Chien(nomChien);
-        Chat   chat   = new Chat(nomChat);
+        nomChien = nomChien.trim();
+        nomChat = nomChat.trim();
+
+        Chien chien = new Chien(nomChien);
+        Chat chat = new Chat(nomChat);
         Oiseau oiseau = new Oiseau("Titi");
 
-        // Tableau Animal[] contenant les 3 animaux (Exercice 4 : Oiseau ajouté sans toucher à la boucle)
         Animal[] animaux = { chien, chat, oiseau };
 %>
-        <%-- Démonstration du polymorphisme (boucle de base) --%>
-        <p>Démonstration du polymorphisme :<br>
-        Le tableau est déclaré <code>Animal[]</code>, mais c'est bien la méthode
-        <code>crier()</code> de la sous-classe (Chien, Chat ou Oiseau) qui est appelée à l'exécution.</p>
-        <%
-            for (Animal a : animaux) {
-        %>
-            <p><%= a.crier() %></p>
-        <%
-            }
-        %>
 
-        <%-- Exercice 1 : toString() --%>
-        <h2>Exercice 1 : Redéfinir toString()</h2>
-        <%
-            for (Animal a : animaux) {
-        %>
-            <p><%= a.toString() %></p>
-        <%
-            }
-        %>
+<hr>
 
-        <%-- Exercice 2 : Classe abstraite Forme --%>
-        <h2>Exercice 2 : La classe abstraite Forme</h2>
-        <%
-            Forme[] formes = { new Cercle(5), new Carre(4) };
-            for (Forme f : formes) {
-        %>
-            <p><%= f.toString() %> → Aire : <%= String.format("%.2f", f.aire()) %></p>
-        <%
-            }
-        %>
+<h2>Démonstration du polymorphisme</h2>
 
-        <%-- Exercice 3 : Interface Affichable --%>
-        <h2>Exercice 3 : L'interface Affichable</h2>
-        <%
-            Affichable[] affichables = { chien, chat };
-            for (Affichable af : affichables) {
-                // On cast pour appeler getAffichage() qui simule afficher()
-                if (af instanceof Chien) {
-        %>
-                    <p><%= ((Chien) af).getAffichage() %></p>
-        <%
-                } else if (af instanceof Chat) {
-        %>
-                    <p><%= ((Chat) af).getAffichage() %></p>
-        <%
-                }
-            }
-        %>
+<p>
+    Le tableau est déclaré <code>Animal[]</code>, mais chaque objet utilise
+    sa propre méthode <code>crier()</code>.
+</p>
 
-        <%-- Exercice 4 : Oiseau dans le tableau (déjà inclus dans animaux[]) --%>
-        <h2>Exercice 4 : Ajouter un Oiseau</h2>
-        <p>L'Oiseau "Titi" a été ajouté au tableau <code>Animal[]</code>.
-           La boucle d'affichage n'a pas été modifiée — le polymorphisme fait le reste.</p>
-        <%
-            for (Animal a : animaux) {
-        %>
-            <p><%= a.crier() %></p>
-        <%
-            }
-        %>
+<%
+    for (Animal animal : animaux) {
+%>
+        <p><%= animal.crier() %></p>
+<%
+    }
+%>
 
-        <%-- Exercice 5 : instanceof --%>
-        <h2>Exercice 5 : L'opérateur instanceof</h2>
-        <%
-            for (Animal a : animaux) {
-                String type;
-                if      (a instanceof Chien)  type = "C'est un chien";
-                else if (a instanceof Chat)   type = "C'est un chat";
-                else                          type = "Autre animal";
-        %>
-            <p><%= a.toString() %> → <%= type %></p>
-        <%
-            }
-        %>
+<hr>
 
-<% } %>
+<!-- ============================================================
+     EXERCICE 1 : toString()
+     ============================================================ -->
+<h2>Exercice 1 : Redéfinir toString()</h2>
+
+<%
+    for (Animal animal : animaux) {
+%>
+        <p><%= animal.toString() %></p>
+<%
+    }
+%>
+
+<hr>
+
+<!-- ============================================================
+     EXERCICE 2 : CLASSE ABSTRAITE FORME
+     ============================================================ -->
+<h2>Exercice 2 : La classe abstraite Forme</h2>
+
+<%
+    Forme[] formes = {
+        new Cercle(5),
+        new Carre(4)
+    };
+
+    for (Forme forme : formes) {
+%>
+        <p>
+            <%= forme.toString() %> →
+            Aire : <%= String.format(Locale.FRANCE, "%.2f", forme.aire()) %>
+        </p>
+<%
+    }
+%>
+
+<hr>
+
+<!-- ============================================================
+     EXERCICE 3 : INTERFACE AFFICHABLE
+     ============================================================ -->
+<h2>Exercice 3 : L'interface Affichable</h2>
+
+<%
+    Affichable[] affichables = { chien, chat };
+
+    for (Affichable affichable : affichables) {
+%>
+        <p><%= affichable.afficher() %></p>
+<%
+    }
+%>
+
+<hr>
+
+<!-- ============================================================
+     EXERCICE 4 : AJOUTER UN OISEAU
+     ============================================================ -->
+<h2>Exercice 4 : Ajouter un Oiseau</h2>
+
+<p>
+    L'oiseau « Titi » a été ajouté au tableau <code>Animal[]</code>.
+    La boucle d'affichage reste identique : le polymorphisme permet
+    d'appeler automatiquement la bonne méthode <code>crier()</code>.
+</p>
+
+<%
+    for (Animal animal : animaux) {
+%>
+        <p><%= animal.crier() %></p>
+<%
+    }
+%>
+
+<hr>
+
+<!-- ============================================================
+     EXERCICE 5 : INSTANCEOF
+     ============================================================ -->
+<h2>Exercice 5 : L'opérateur instanceof</h2>
+
+<%
+    for (Animal animal : animaux) {
+        String typeAnimal;
+
+        if (animal instanceof Chien) {
+            typeAnimal = "C'est un chien";
+        } else if (animal instanceof Chat) {
+            typeAnimal = "C'est un chat";
+        } else {
+            typeAnimal = "Autre animal";
+        }
+%>
+        <p><%= animal.toString() %> → <%= typeAnimal %></p>
+<%
+    }
+%>
+
+<%
+    }
+%>
 
 <p><a href="index.html">Retour au sommaire</a></p>
+
 </body>
 </html>

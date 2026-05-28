@@ -1,80 +1,147 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <html>
 <head>
-<title>Les constructeurs</title>
+    <title>Les constructeurs</title>
 </head>
 <body bgcolor=white>
 <h1>Exercices sur les constructeurs</h1>
+
 <form action="#" method="post">
-    <p>Saisir un titre de livre : <input type="text" name="titre">
-    <p>Saisir un auteur : <input type="text" name="auteur">
-    <p><input type="submit" value="Créer les livres">
+    <p>Saisir un titre de livre : <input type="text" name="titre"></p>
+    <p>Saisir un auteur : <input type="text" name="auteur"></p>
+    <p><input type="submit" value="Créer les livres"></p>
 </form>
 
-<%-- Une classe Livre avec deux constructeurs : par défaut et avec paramètres --%>
+<%-- ============================================================
+     DÉCLARATIONS DES CLASSES
+     ============================================================ --%>
 <%!
+    // ----- Classe Livre : constructeur par défaut + constructeur avec paramètres -----
     class Livre {
-        String titre;
-        String auteur;
+        private String titre;
+        private String auteur;
 
         // Constructeur par défaut
         public Livre() {
-            this.titre = "Titre inconnu";
+            this.titre  = "Titre inconnu";
             this.auteur = "Auteur inconnu";
         }
 
         // Constructeur avec paramètres
         public Livre(String titre, String auteur) {
-            this.titre = titre;
+            this.titre  = titre;
             this.auteur = auteur;
         }
+
+        public String getTitre()  { return titre; }
+        public String getAuteur() { return auteur; }
+    }
+
+    // ----- Exercices 1, 2, 3, 4 : Classe Etudiant -----
+    class Etudiant {
+        private String nom;
+        private double note;
+
+        // Exercice 3 : constructeur sans paramètre qui chaîne avec this()
+        public Etudiant() {
+            this("Anonyme", 10);   // appelle le constructeur (nom, note)
+        }
+
+        // Exercice 2 : constructeur avec nom uniquement (note = 10 par défaut)
+        public Etudiant(String nom) {
+            this(nom, 10);         // appelle le constructeur (nom, note)
+        }
+
+        // Exercice 2 : constructeur avec nom et note
+        public Etudiant(String nom, double note) {
+            this.nom  = nom;
+            this.note = note;
+        }
+
+        // Exercice 4 : constructeur de copie
+        public Etudiant(Etudiant autre) {
+            this.nom  = autre.nom;
+            this.note = autre.note;
+        }
+
+        public String getNom()   { return nom; }
+        public double getNote()  { return note; }
+    }
+
+    // ----- Exercice 5 : Classe Produit avec validation du prix -----
+    class Produit {
+        private double prix;
+
+        public Produit(double prix) {
+            // Si le prix est négatif, on le force à 0
+            this.prix = (prix < 0) ? 0 : prix;
+        }
+
+        public double getPrix() { return prix; }
     }
 %>
 
-<%-- Récupération des valeurs du formulaire --%>
-<% String titre = request.getParameter("titre"); %>
-<% String auteur = request.getParameter("auteur"); %>
+<%-- ============================================================
+     RÉCUPÉRATION DU FORMULAIRE ET AFFICHAGE
+     ============================================================ --%>
+<%
+    String titre  = request.getParameter("titre");
+    String auteur = request.getParameter("auteur");
 
-<% if (titre != null && auteur != null) { %>
+    if (titre != null && auteur != null && !titre.isEmpty() && !auteur.isEmpty()) {
+%>
+        <%-- Livre via constructeur par défaut --%>
+        <%  Livre l1 = new Livre(); %>
+        <p>Livre créé via le constructeur par défaut :</p>
+        <p>Titre : <%= l1.getTitre() %> - Auteur : <%= l1.getAuteur() %></p>
 
-    <%-- Création de deux livres : un via le constructeur par défaut, l'autre avec les valeurs saisies --%>
-    <% Livre livreVide = new Livre(); %>
-    <% Livre livrePlein = new Livre(titre, auteur); %>
+        <%-- Livre via constructeur avec paramètres --%>
+        <%  Livre l2 = new Livre(titre, auteur); %>
+        <p>Livre créé via le constructeur avec paramètres :</p>
+        <p>Titre : <%= l2.getTitre() %> - Auteur : <%= l2.getAuteur() %></p>
 
-    <p>Livre créé via le constructeur par défaut :</p>
-    <p>Titre : <%= livreVide.titre %> - Auteur : <%= livreVide.auteur %></p>
+        <%-- Exercice 1 : constructeur par défaut (via chaînage ex3) --%>
+        <h2>Exercice 1 : Le constructeur par défaut</h2>
+        <%  Etudiant e1 = new Etudiant(); %>
+        <p>Etudiant créé avec le constructeur par défaut :</p>
+        <p>Nom : <%= e1.getNom() %> - Note : <%= e1.getNote() %></p>
 
-    <p>Livre créé via le constructeur avec paramètres :</p>
-    <p>Titre : <%= livrePlein.titre %> - Auteur : <%= livrePlein.auteur %></p>
+        <%-- Exercice 2 : surcharge des constructeurs --%>
+        <h2>Exercice 2 : La surcharge de constructeurs</h2>
+        <%
+            Etudiant e2 = new Etudiant();             // constructeur sans paramètre
+            Etudiant e3 = new Etudiant("Alice");      // constructeur avec nom uniquement
+            Etudiant e4 = new Etudiant("Bob", 17);    // constructeur avec nom et note
+        %>
+        <p>Constructeur sans paramètre → Nom : <%= e2.getNom() %> - Note : <%= e2.getNote() %></p>
+        <p>Constructeur avec nom seul  → Nom : <%= e3.getNom() %> - Note : <%= e3.getNote() %></p>
+        <p>Constructeur avec nom+note  → Nom : <%= e4.getNom() %> - Note : <%= e4.getNote() %></p>
 
-<h2>Exercice 1 : Le constructeur par défaut</h2>
-<p>Créer une classe <code>Etudiant</code> avec un constructeur par défaut qui initialise :</br>
-- l'attribut <code>nom</code> à "Anonyme"</br>
-- l'attribut <code>note</code> à 10.</br>
-Instancier un étudiant avec ce constructeur et afficher ses informations.</p>
+        <%-- Exercice 3 : chaînage avec this() --%>
+        <h2>Exercice 3 : Chaîner les constructeurs avec this()</h2>
+        <p>Le constructeur sans paramètre appelle <code>this("Anonyme", 10)</code>
+           pour éviter la duplication du code d'initialisation.</p>
+        <%  Etudiant e5 = new Etudiant(); %>
+        <p>Résultat : Nom : <%= e5.getNom() %> - Note : <%= e5.getNote() %></p>
 
-<h2>Exercice 2 : La surcharge de constructeurs</h2>
-<p>Ajouter à la classe <code>Etudiant</code> deux autres constructeurs :</br>
-- un constructeur prenant uniquement le <code>nom</code> en paramètre (la note vaut 10 par défaut),</br>
-- un constructeur prenant le <code>nom</code> et la <code>note</code> en paramètres.</br>
-Créer 3 étudiants avec les 3 constructeurs et afficher leurs informations.</p>
+        <%-- Exercice 4 : constructeur de copie --%>
+        <h2>Exercice 4 : Le constructeur de copie</h2>
+        <%
+            Etudiant original = new Etudiant("Marie", 15);
+            Etudiant copie    = new Etudiant(original);   // constructeur de copie
+        %>
+        <p>Original → Nom : <%= original.getNom() %> - Note : <%= original.getNote() %></p>
+        <p>Copie    → Nom : <%= copie.getNom() %>    - Note : <%= copie.getNote() %></p>
 
-<h2>Exercice 3 : Chaîner les constructeurs avec this()</h2>
-<p>Dans la classe <code>Etudiant</code>, modifier le constructeur sans paramètre pour qu'il appelle le constructeur à deux paramètres avec <code>this("Anonyme", 10)</code>.</br>
-Cela évite la duplication du code d'initialisation.</p>
-
-<h2>Exercice 4 : Le constructeur de copie</h2>
-<p>Ajouter à la classe <code>Etudiant</code> un constructeur qui prend en paramètre un autre objet <code>Etudiant</code> et recopie ses attributs.</br>
-Exemple d'utilisation :</br>
-<code>Etudiant e1 = new Etudiant("Marie", 15);</code></br>
-<code>Etudiant e2 = new Etudiant(e1);</code></p>
-
-<h2>Exercice 5 : Valider les paramètres dans le constructeur</h2>
-<p>Créer une classe <code>Produit</code> avec un attribut <code>prix</code> (double).</br>
-Dans le constructeur, refuser un prix négatif : si <code>prix &lt; 0</code>, forcer la valeur à 0.</br>
-Tester avec un produit créé à -50€ et afficher son prix réel.</p>
+        <%-- Exercice 5 : validation dans le constructeur --%>
+        <h2>Exercice 5 : Valider les paramètres dans le constructeur</h2>
+        <%  Produit p = new Produit(-50); %>
+        <p>Produit créé avec un prix de -50€.</p>
+        <p>Prix réel appliqué : <%= p.getPrix() %> €
+           (le prix négatif a été forcé à 0)</p>
 
 <% } %>
+
 <p><a href="index.html">Retour au sommaire</a></p>
 </body>
 </html>
